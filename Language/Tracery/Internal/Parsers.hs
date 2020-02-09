@@ -1,8 +1,7 @@
 module Language.Tracery.Internal.Parsers where
 
 import Language.Tracery.Internal.Grammar as G
-import qualified Data.Set as S
-import qualified Data.Text as T
+import Language.Tracery.Internal.Modifiers as M
 import Text.Parsec
 import Text.Parsec.String
 
@@ -16,11 +15,11 @@ pSentence :: Parser G.Sentence
 pSentence = Sentence <$> pComponents
 
 pSymbol :: Parser G.Symbol
-pSymbol = fromString <$> many1 alphaNum
+pSymbol = Symbol <$> many1 alphaNum
 
 pComponents :: Parser [G.Component]
 pComponents = do
-    comps <- (map Lit <$> pLiterals) <|> (map Act <$> pActionList)
+    comps <- ((: []) . Literal <$> pLiteral) <|> (map Action <$> pActionList)
     rest <- option [] pComponents
     return $ comps ++ rest
 
@@ -40,25 +39,20 @@ pEscapedString' = do
     rest <- option "" pEscapedString
     return $ '\\' : c : rest
 
-pLiterals :: Parser [G.Literal]
-pLiterals = do
-    l <- pLiteral
-    return [l]
-
-pLiteral :: Parser G.Literal
+pLiteral :: Parser G.LiteralComp
 pLiteral = fromString <$> pEscapedString
 
-pActionList :: Parser [G.Action]
+pActionList :: Parser [G.ActionComp]
 pActionList = do
     _ <- char '#'
     actions <- many1 pAction
     _ <- char '#'
     return actions
 
-pAction :: Parser G.Action
+pAction :: Parser G.ActionComp
 pAction = pStoreAction <|> pExpandAction
 
-pStoreAction :: Parser G.Action
+pStoreAction :: Parser G.ActionComp
 pStoreAction = do
     _ <- char '['
     sym <- pSymbol
@@ -67,22 +61,18 @@ pStoreAction = do
     _ <- char ']'
     return $ G.Store sym sen
 
-pExpandAction :: Parser G.Action
+pExpandAction :: Parser G.ActionComp
 pExpandAction = Expand <$> pSymRef
 
 pSymRef :: Parser G.SymbolRef
 pSymRef = do
     sym <- pSymbol
     mods <- many pMod
-    return $ G.Sym sym (S.fromList mods)
+    return $ G.Sym sym mods
 
-pMod :: Parser G.Modifier
+pMod :: Parser M.ModifierName
 pMod = do
     _ <- char '.'
     (Symbol modifier) <- pSymbol
-    case T.unpack modifier of
-        "c" -> return Capitalize
-        "p" -> return Pluralize
-        "a" -> return AAn
-        _ -> unexpected "unknown modifier"
+    return $ Mod modifier
 

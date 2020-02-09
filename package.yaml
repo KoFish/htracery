@@ -35,6 +35,7 @@ dependencies:
 - MissingH
 - charset
 - random
+- raw-strings-qq
 
 ghc-options:
 - -Wall
