@@ -7,6 +7,7 @@ import System.Random
 -- |Internal state of a Tracery instance.
 data Memory = Memory Grammar Modifiers StdGen
 
+-- |Create a new 'Memory' to use for evaluation.
 initMemory :: Grammar -> Modifiers -> StdGen -> Memory
 initMemory = Memory
 

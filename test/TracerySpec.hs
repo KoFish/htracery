@@ -42,24 +42,29 @@ spec =
       in origin `shouldBe` [expectedSentence]
     it "trace simple grammar" $
       let Right gram = parseGrammar simpleGrammar1
-          memory = initMemory gram defaultModifiers g
+          memory = initMemory gram englishModifiers g
           trace = T.unpack $ runTracery fromOrigin memory
       in trace `shouldBe` "foobar"
     it "trace simple grammar 2" $
       let Right gram = parseGrammar simpleGrammar2
-          memory = initMemory gram defaultModifiers g
+          memory = initMemory gram englishModifiers g
           trace = T.unpack $ runTracery fromOrigin memory
       in trace `shouldBe` "foobar"
     it "trace grammar with unidentified ref" $
       let Right gram = parseGrammar $ Char8.pack [r|{"origin": ["#test#"]}|]
-          memory = initMemory gram defaultModifiers g
+          memory = initMemory gram englishModifiers g
           trace = T.unpack $ runTracery fromOrigin memory
       in trace `shouldBe` ""
     it "trace grammar with defined default modifier" $
       let Right gram = parseGrammar $ Char8.pack [r|{"origin": ["#foo.c#"], "foo": ["test"]}|]
-          memory = initMemory gram defaultModifiers g
+          memory = initMemory gram englishModifiers g
           trace = T.unpack $ runTracery fromOrigin memory
       in trace `shouldBe` "Test"
+    it "trace grammer with multiple modifiers" $
+      let Right gram = parseGrammar $ Char8.pack [r|{"origin": ["#foo.c.a# #foo.ed.a.t# #foo#"], "foo": ["test"]}|]
+          memory = initMemory gram englishModifiers g
+          trace = T.unpack $ runTracery fromOrigin memory
+      in trace `shouldBe` "a Test A Tested test"
     it "trace with memory" $ property prop_memory_test
   where g = mkStdGen 1
         fromOrigin = tracery $ Symbol "origin"
@@ -77,7 +82,7 @@ prop_memory_test :: Int -> Property
 prop_memory_test seed =
   case parseGrammar memoryGrammar >>=
                    \gram ->
-                     let memory = initMemory gram defaultModifiers (mkStdGen (seed + 1))
+                     let memory = initMemory gram englishModifiers (mkStdGen (seed + 1))
                          trace = runTracery (tracery $ Symbol "start") memory
                      in return $ T.unpack trace
   of

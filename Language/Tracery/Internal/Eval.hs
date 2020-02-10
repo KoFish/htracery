@@ -53,7 +53,7 @@ evalSentence (c : rest) = do
     return $ T.concat [expanded, cont]
 
 -- |Run a 'Tracery' instance to produce the actual trace with a specific
---  randomiser and 'Grammar'. This uses the 'defaultModifiers'.
+--  randomiser and 'Grammar'. This uses the 'englishModifiers'.
 runTracery :: Tracery T.Text -> Memory -> T.Text
 runTracery st mem = do
     let (result, _) = runState st mem

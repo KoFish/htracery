@@ -9,7 +9,7 @@ import           Prelude
 import Language.Tracery.Internal.Modifiers
 
 -- |Describes the possible traces.
---  A map of 'Symbols' to a list of 'Sentences'.
+--  A map of 'Symbol's to a list of 'Sentence's.
 type Grammar = HM.HashMap Symbol [Sentence]
 newtype Symbol = Symbol String
 newtype Sentence = Sentence [Component]
@@ -27,14 +27,16 @@ data SymbolRef = Sym Symbol [ModifierName]
 
 -- |Fetch the given 'Symbol' from the 'Grammar'.
 lookup :: Symbol -> Grammar -> Maybe [Sentence]
-lookup sym gram = HM.lookup sym gram
+lookup = HM.lookup
 
 specialSymbols :: String
 specialSymbols = ['\\', '#', '[', ']', '=']
 
+-- |Initialize a new empty 'Grammar'.
 newGrammar :: Symbol -> [Sentence] -> Grammar
 newGrammar = HM.singleton
 
+-- |Add a new 'Symbol' to 'Grammar'
 addGrammar :: Symbol -> [Sentence] -> Grammar -> Grammar
 addGrammar = HM.insert
 

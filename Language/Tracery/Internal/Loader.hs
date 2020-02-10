@@ -14,6 +14,7 @@ import           Prelude
 
 type Error = String
 
+-- |Load grammar from a json file.
 loadGrammar :: FilePath -> IO Grammar
 loadGrammar fp = do
     content <- LBS.readFile fp
@@ -21,6 +22,7 @@ loadGrammar fp = do
         Right grammar -> pure grammar
         Left err -> error err
 
+-- |Load grammar from a bytestring.
 parseGrammar :: LBS.ByteString -> Either Error Grammar
 parseGrammar = objToGrammar . A.eitherDecode
 
